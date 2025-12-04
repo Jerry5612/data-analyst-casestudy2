@@ -247,7 +247,7 @@ The goal of this visualisation is to confirm the size and dual nature of the Hig
 
 ![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image6.png)
 
-### *Data Discrepancy
+#### *Data Discrepancy
 A conflict arose in defining the size of the High Frequency segment due to tool logic differences. While the final strategic count was 1,079, the initial raw count was 1,521, indicating a significant overlap.
 
 Source of Conflict: The difference stemmed from 291 overlapping customers who met both the High Frequency and the High Basket Size thresholds.
@@ -257,7 +257,7 @@ Tool Logic:
 
 Resolution: A separate calculation confirmed that 291 Regular Shoppers qualified for both high-value signals.
 
-### Strategic Prioritisation and Final Assignment
+#### Strategic Prioritisation and Final Assignment
 To ensure a clean, non-overlapping budget split and prevent conflicting marketing messages, a strategic assignment decision was made for the 291 overlapping customers.
 1. Prioritisation Rationale: All 291 overlapping customers were strategically assigned to the High Frequency Segment. This choice was based on the premise that high frequency is the strongest indicator of customer loyalty and greater readiness to adopt the Mart Priority service perks.
 2. Final Distinct Segments: This methodology resulted in two distinct, non-overlapping target groups, perfectly balancing the budget:
