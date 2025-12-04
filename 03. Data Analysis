@@ -1,0 +1,136 @@
+-- Creates a temporary table to determine the high-value thresholds (the 90th percentile for Frequency and Monetary Value) for Question 1.
+SELECT
+    -- Calculate the value at the 90th percentile for Frequency (Orders)
+    APPROX_QUANTILES(Frequency_Orders, 100)[OFFSET(90)] AS F_90th_Percentile,
+    -- Calculate the value at the 90th percentile for Monetary Value
+    APPROX_QUANTILES(Monetary_Value, 100)[OFFSET(90)] AS M_90th_Percentile
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics`;
+
+-- Creates a final table applying those thresholds to compare the two segments by assigning a Customer_Tier flag (Loyalty Tier or Regular Shopper) to every customer based on those thresholds for Question 1.
+SELECT
+    -- Define the Customer Tier based on the 90th percentile thresholds
+    CASE
+        -- A customer is Loyalty Tier if they are in the top 10% for both Frequency AND Monetary Value
+        WHEN
+            t1.Frequency_Orders >= 13
+            AND t1.Monetary_Value >= 5467.82
+        THEN 'Loyalty Tier Customer'
+        ELSE 'Regular Shopper'
+    END AS Customer_Tier,
+    -- Key Aggregations for comparison (answering Question 1)
+    COUNT(t1.`Customer ID`) AS Total_Customers,
+    ROUND(AVG(t1.Recency_Days), 0) AS Avg_Recency_Days,
+    ROUND(AVG(t1.Frequency_Orders), 1) AS Avg_Frequency_Orders,
+    ROUND(AVG(t1.Monetary_Value), 2) AS Avg_Monetary_Value,
+    ROUND(AVG(t1.Average_Basket_Size), 2) AS Avg_Basket_Size,
+    ROUND(AVG(t1.Total_Items_Purchased), 0) AS Avg_Items_Purchased
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1
+GROUP BY
+    Customer_Tier
+ORDER BY
+    Avg_Monetary_Value DESC;
+
+-- To get a single number—the 75th percentile of Average Basket Size for Regular Shoppers. This specific dollar value is needed for defining the "High Basket Size Signal." for Question 2.
+SELECT
+    APPROX_QUANTILES(t1.Average_Basket_Size, 4)[OFFSET(3)] AS Q3_AOV_Regular_Shopper_Threshold
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1
+WHERE
+    -- Exclude Loyalty Tier Customers
+    NOT (t1.Frequency_Orders >= 13 AND t1.Monetary_Value >= 5467.82);
+
+-- To generate the final list of High-Potential Regular Shoppers that my marketing campaign will target for Question 2.
+SELECT
+    t1.`Customer ID`,
+    t1.Recency_Days,
+    t1.Frequency_Orders,
+    t1.Monetary_Value,
+    t1.Average_Basket_Size,
+    -- Flag the primary signal that makes them high-potential
+    CASE
+        WHEN t1.Frequency_Orders >= 7 THEN 'High Frequency Signal'
+        WHEN t1.Average_Basket_Size > 389.78 THEN 'High Basket Size Signal'
+        ELSE 'Low Signal' -- (Should not appear due to WHERE clause, but kept for logic safety)
+    END AS Conversion_Signal
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1
+WHERE
+    -- 1. Exclude the existing Loyalty Tier Customers
+    NOT (t1.Frequency_Orders >= 13 AND t1.Monetary_Value >= 5467.82)
+    AND
+    -- 2. Include Regular Shoppers who meet AT LEAST ONE high-potential signal:
+    (
+        t1.Frequency_Orders >= 7 -- High Frequency Signal
+        OR
+        t1.Average_Basket_Size > 389.78 -- High Basket Size Signal
+    )
+ORDER BY
+    t1.Monetary_Value DESC;
+
+-- For counting the number of Customers by Conversion Signal for Question 2.
+WITH High_Potential_Customers AS (
+    SELECT
+        t1.`Customer ID`,
+        -- Define the Conversion Signal using the established thresholds
+        CASE
+            WHEN t1.Frequency_Orders >= 7 THEN 'High Frequency Signal'
+            WHEN t1.Average_Basket_Size > 389.78 THEN 'High Basket Size Signal'
+            -- Note: Due to the WHERE clause, 'Low Signal' should not be returned,
+            -- but the logic is maintained from Query 7.
+            ELSE 'Low Signal'
+        END AS Conversion_Signal
+    FROM
+        `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1
+    WHERE
+        -- 1. Exclude the existing Loyalty Tier Customers
+        NOT (t1.Frequency_Orders >= 13 AND t1.Monetary_Value >= 5467.82)
+        AND
+        -- 2. Include Regular Shoppers who meet AT LEAST ONE high-potential signal:
+        (
+            t1.Frequency_Orders >= 7 -- High Frequency Signal (F >= 7)
+            OR
+            t1.Average_Basket_Size > 389.78 -- High Basket Size Signal (AOV > £389.78)
+        )
+)
+-- Final aggregation to count customers in each signal group
+SELECT
+    Conversion_Signal,
+    COUNT(`Customer ID`) AS Total_High_Potential_Customers
+FROM
+    High_Potential_Customers
+GROUP BY
+    Conversion_Signal
+ORDER BY
+    Total_High_Potential_Customers DESC;
+
+-- To insert a new, permanent segmentation column (Column_Tier) based on established thresholds (Before building visualisations in Tableau)
+CREATE OR REPLACE TABLE
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS
+SELECT
+    t1.*, -- Select ALL existing columns from the RFM table
+    -- Add the new, permanent segmentation column based on established thresholds
+    CASE
+        WHEN
+            t1.Frequency_Orders >= 13
+            AND t1.Monetary_Value >= 5467.82
+        THEN 'Loyalty Tier Customer'
+        ELSE 'Regular Shopper'
+    END AS Customer_Tier
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1;
+
+-- (For Data Discrepancy in Visualisation 4)
+SELECT
+    COUNT(t1.`Customer ID`) AS Overlap_Customers_Count
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS t1
+WHERE
+    -- 1. Exclude existing Loyalty Tier Customers (F >= 13 AND M >= 5467.82)
+    -- This ensures we only count Regular Shoppers for the target audience.
+    NOT (t1.Frequency_Orders >= 13 AND t1.Monetary_Value >= 5467.82)
+    -- 2. Must meet the High Frequency threshold
+    AND t1.Frequency_Orders >= 7
+    -- 3. Must meet the High Basket Size threshold
+    AND t1.Average_Basket_Size > 389.78;
