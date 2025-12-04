@@ -1,0 +1,63 @@
+-- CTE 1: Remove Invalid Data (Missing & Non-Sales) by creating a base of valid sales transactions
+WITH clean_base AS 
+    (SELECT
+        *
+    FROM
+        `my-first-project-475902.global_mart_historical_transactional_dataset.global_mart`
+    WHERE
+        `Customer ID` IS NOT NULL
+        AND Description IS NOT NULL
+        AND Quantity > 0
+        AND Price > 0
+)
+-- CTE 2: Calculate Line Total and apply a unique row identifier
+, prep_data AS (
+    SELECT
+        *,
+        Quantity * Price AS Line_Total, -- Calculate the monetary value for the line item
+        -- Use ROW_NUMBER() over the composite key to find true duplicates
+        ROW_NUMBER() OVER(
+            PARTITION BY 
+              Invoice, 
+              StockCode, 
+              Quantity, 
+              CAST(Price AS STRING), 
+              CAST(`Customer ID` AS INT64)
+            ORDER BY InvoiceDate
+        ) AS rn
+    FROM
+        clean_base
+)
+-- Final SELECT to remove duplicates
+SELECT
+    *
+FROM
+    prep_data
+WHERE
+    rn = 1
+
+-- Create a new table named customer_rfm_metrics.
+CREATE OR REPLACE TABLE
+    `my-first-project-475902.global_mart_historical_transactional_dataset.customer_rfm_metrics` AS
+SELECT
+    `Customer ID`,
+    -- 1. RECENCY
+    DATE_DIFF(
+        (SELECT MAX(Sale_Date) FROM `my-first-project-475902.global_mart_historical_transactional_dataset.global_mart` WHERE `Customer ID` IS NOT NULL), -- Reference Date
+        MAX(t1.Sale_Date), -- Latest Sale Date
+        DAY
+    ) AS Recency_Days,
+    -- 2. FREQUENCY: Total number of unique orders/invoices
+    COUNT(DISTINCT t1.Invoice) AS Frequency_Orders,
+    -- 3. MONETARY: Total revenue generated
+    ROUND(SUM(t1.Line_Total), 2) AS Monetary_Value,
+    -- 4. ADDITIONAL METRICS
+    ROUND(SUM(t1.Line_Total) / COUNT(DISTINCT t1.Invoice), 2) AS Average_Basket_Size,
+    ROUND(AVG(t1.Quantity), 2) AS Avg_Items_Per_Transaction,
+    COUNT(t1.StockCode) AS Total_Items_Purchased
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset.global_mart` AS t1
+WHERE
+    `Customer ID` IS NOT NULL -- Ensures only valid customers are included in the RFM table
+GROUP BY
+    `Customer ID`;
