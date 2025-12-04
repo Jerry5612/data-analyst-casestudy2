@@ -8,6 +8,7 @@ SQL Queries:
 01. Data Exploration
 02. Data Cleaning
 03. Data Analysis
+
 Data Visualisations: [Tableau](https://public.tableau.com/app/profile/jerry.soh/viz/ecommerce-customertype-casestudy/ConversionScatterPlotRFMTargeting)
 ## Background
 ### Global Mart 
@@ -53,6 +54,7 @@ Due to its inability in managing large amounts of information, a Microsoft Excel
 
 ### Data Exploration
 SQL Query: Data Exploration
+
 Before cleaning the data, I am familiarising myself with the data to find the inconsistencies.
 
 1. The table below shows all the column names and their data types. The Invoice and StockCode columns are my primary keys.
@@ -103,6 +105,7 @@ To ensure the analysis is comprehensive and fair across all customers, the Refer
 ## Analyse
 ### Data Analysis
 SQL Query: Data Analysis
+
 The analysis stage begins with the RFM Analysis, as this is the industry-standard method for segmenting customers based on their transactional behavior. This step is critical as it transforms raw line-item data into meaningful, customer-level metrics that directly address Question 1 (How do Loyalty Tier Customers and Regular Shoppers differ in their transactional and behavioral patterns?) and lay the foundation for answering Question 2 (What transactional or website behavioral signals would motivate a Regular Shopper to transition into a Loyalty Tier Customer?).
 
 The RFM calculation generates a single row of summarized purchase history per unique customer, utilizing three primary and two supplementary dimensions. Recency (R) is defined as the days since the customer's last purchase, and its primary purpose is to measure engagement and activity level. Frequency (F) represents the total number of unique orders or invoices, serving to measure customer loyalty and habit. The final primary metric, Monetary (M), is the total value of all purchases (Total Expenditure), which measures the customer's overall financial contribution and value to Global Mart.
