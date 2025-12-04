@@ -1,0 +1,26 @@
+-- Data Exploration
+-- checking the data types of all columns
+SELECT
+    column_name,
+    data_type
+FROM
+    `my-first-project-475902.global_mart_historical_transactional_dataset`.INFORMATION_SCHEMA.COLUMNS
+WHERE
+    table_name = 'global_mart'
+ORDER BY
+    -- Orders by both components of the composite key first
+    CASE
+        WHEN column_name = 'Invoice' THEN 1
+        WHEN column_name = 'StockCode' THEN 2
+        ELSE 3
+    END,
+    column_name;
+-- Identify Data (Missing & Non-Sales)
+SELECT
+    COUNTIF(`Customer ID` IS NULL) AS null_customer_id_count,
+    COUNTIF(Invoice IS NULL) AS null_invoice_count,
+    COUNTIF(Description IS NULL) AS null_description_count,
+    COUNTIF(Quantity < 1) AS non_positive_quantity_count,
+    COUNTIF(Price <= 0) AS non_positive_price_count
+FROM
+    my-first-project-475902.global_mart_historical_transactional_dataset.global_mart;
