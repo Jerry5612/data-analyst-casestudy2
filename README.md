@@ -1,6 +1,7 @@
 # Data Analytics Capstone: Global Mart Case Study
 ## Introduction
 In this case study, I will perform many real-world tasks of a junior data analyst at a fictional company, Global Mart. In order to answer the key business questions, I will follow the steps of the data analysis process: Ask, Prepare, Process, Analyse, Share, and Act.
+
 Quick links:
 Data Source: [kaggle_dataset](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci) [accessed on 20/11/25]
 
