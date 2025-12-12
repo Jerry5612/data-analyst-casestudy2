@@ -40,14 +40,7 @@ I will use Global Mart’s historical transaction data to analyse and identify t
 ### Data Organization
 There is 1 Comma-separated values (CSV) file with naming of online_retail_II.csv and it contains all transactions occurring for a UK-based and registered, non-store online retail for 2 years, between 01/12/2009 and 09/12/2011. The Attribute Information are Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID and Country.
 
-### Data Dictionary Table 
-#### Transactional and Product Data
-
-The dataset includes the Invoice No., a nominal field formatted as a 6-digit integral with a 'C' prefix for cancellations. This serves as the unique transaction identifier, crucial for cleaning cancelled orders and analyzing overall transaction volume. Stock Code / Description provides both a 5-digit nominal integral code and the Item Name, used for product identification, inventory analysis, and sales volume tracking. The Quantity field is a numeric integer representing the volume of goods sold, which is utilized for calculating total sales and identifying top-selling items.
-
-#### Temporal, Financial, and Customer Data
-
-Invoice Date is recorded as a numeric timestamp, providing granular temporal data necessary for time-series analysis and identifying peak sales periods. The Price is a numeric value in Sterling (£), which is essential for accurate revenue calculation and margin analysis. Customer ID is a nominal 5-digit integral used as a unique customer identifier, vital for market segmentation and purchase frequency analysis (RFM modeling). Finally, Country is a nominal field providing the geographical dimension needed for market analysis and identifying high-value regions.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image15.png)
 
 ## Process
 BigQuery is used to clean this dataset and perform analysis on its data.
@@ -110,9 +103,9 @@ SQL Query: Data Analysis
 
 The analysis stage begins with the RFM Analysis, as this is the industry-standard method for segmenting customers based on their transactional behavior. This step is critical as it transforms raw line-item data into meaningful, customer-level metrics that directly address Question 1 (How do Loyalty Tier Customers and Regular Shoppers differ in their transactional and behavioral patterns?) and lay the foundation for answering Question 2 (What transactional or website behavioral signals would motivate a Regular Shopper to transition into a Loyalty Tier Customer?).
 
-The RFM calculation generates a single row of summarized purchase history per unique customer, utilizing three primary and two supplementary dimensions. Recency (R) is defined as the days since the customer's last purchase, and its primary purpose is to measure engagement and activity level. Frequency (F) represents the total number of unique orders or invoices, serving to measure customer loyalty and habit. The final primary metric, Monetary (M), is the total value of all purchases (Total Expenditure), which measures the customer's overall financial contribution and value to Global Mart.
+The RFM calculation generates a single row per unique customer, summarising their purchase history across three primary and two supplementary dimensions:
 
-Two supplementary metrics provide further depth: Avg. Basket Size calculates the average transaction value to help identify high-volume purchasing, particularly wholesaler behavior. Lastly, Total Items tracks the total count of all products purchased, measuring the total volume handled by the customer.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image16.png)
 
 The key challenge is that the dataset does not have a simple "customer_type" column or equivalent. Therefore, I must define the Loyalty Tier segment based on the criteria in my project’s background:
 
@@ -129,9 +122,7 @@ This query creates two new tables:
 
  ![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image10.png)
 
-The comparison between Regular Shoppers (RS) and Loyalty Tier Customers (LTC) reveals the latter to be a highly elite and valuable segment. The Total Customer count shows LTCs are a small segment, consisting of only 442 customers compared to 5,436 RS (a 12:1 ratio). Despite their size, LTCs are extremely consistent, with an Avg. Frequency Orders of 33.2 orders, which is 8.1 times higher than the 4.1 orders placed by RS, confirming they are highly engaged in Global Mart services.
-
-Financially, the disparity is dramatic: the Avg. Monetary Value for LTCs is £21,414.63, an astounding 14.7 times higher than the RS value, demonstrating that LTCs contribute disproportionately high revenue. This high spend is supported by a 1.6 times higher Avg. Basket Size (£585.41 vs. £368.90), suggesting greater volume or wholesale purchasing behavior. Furthermore, LTCs exhibit far superior Avg. Recency, purchasing on average every 32.0 days, which is 6.7 times more recently than the Regular Shopper's 215.0 days.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image17.png)
 
 ### Key findings for Question 1
 Loyalty Tier Customers (LTCs) are the most valuable asset, generating nearly 15 times the total revenue of a Regular Shopper (RS), primarily through extreme purchase frequency (8x higher) and significantly larger average order values. The conversion goal is highly justified, as moving an RS to the LTC tier results in an exponential increase in Global Mart’s profits.
@@ -165,9 +156,7 @@ Next, I ran a query to generate a table to show the total count of customers for
 ### Key findings for Question 2
 The analysis confirms that High-Potential Regular Shoppers are almost equally divided into two distinct groups, requiring tailored marketing approaches:
 
-1. The first segment, identified by the High Basket Size Signal, comprises 1,087 potential customers. Their primary behavior indicates they are Wholesalers or Bulk Buyers who prioritize volume and cost savings. The strategic goal is to convert this group to the Mart Priority Discount Rate, directly appealing to their motivation for monetary benefits.
-
-2. The second segment, defined by the High Frequency Signal, consists of 1,079 customers. Their behavior points to them being highly engaged and loyal retail shoppers who place a high value on excellent service and convenience. The strategic goal for this cohort is to convert them to Mart Priority Exclusive Services, leveraging benefits centered on priority and service to align with their primary motivation.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image18.png)
 
 ## The next step is to answer Question 3: How can Global Mart use digital channels and in-app promotions to convince Regular Shoppers to become Loyalty Tier Customers?
 
@@ -176,16 +165,12 @@ The success of the marketing programme depends on its ability to convert the 2,1
 ### Strategy 1: The Monetary Incentive (Targeting the Wholesaler/Bulk Buyer)
 This strategy targets the 1,087 Regular Shoppers identified by the High Basket Size Signal (AOV>£389.78). This segment demonstrates behaviouur focused on volume and cost-efficiency.
 
-1. The core Value Proposition Focus of this tactical plan centers on offering Special Discount Rates. The rationale is that these specific customers are profit-driven, and a guaranteed discount directly offsets their high volume costs, which either maximises their profit margins or reduces their overall expenditure. The promotion will be deployed through the Digital Channel, utilising a Checkout Page Promotion (In-App) and follow-up Email Retargeting, based on the understanding that the highest-impact moment is when the customer is actively making a large purchase.
-
-2. A specific Promotion Example is a Checkout Page Pop-up that triggers when the customer's cart value exceeds a threshold (e.g., £300). The message is designed to offer immediate value: "Unlock a flat 10% discount on THIS order AND all future purchases by subscribing to Mart Priority. Maximise your savings now!" This tactic uses the customer's current large transaction as a direct incentive, highlighting immediate financial savings. The Conversion Trigger is met when the High Potential Retail Shopper (HPRS) crosses the Average Order Value (AOV) threshold of >£389.78 or when the current cart value is >£300, ensuring the cost-saving solution is presented precisely when the data signals bulk purchasing behaviour.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image19.png)
 
 ### Strategy 2: The Service & Priority Incentive (Targeting the Loyal/Frequent Shopper)
 This strategy targets the 1,079 Regular Shoppers identified by the High Frequency Signal (F≥7 Orders). This segment is already highly engaged and sensitive to rewards, service quality, and exclusive access.
 
-1. The tactical plan for the loyalty-driven segment is built around a Value Proposition Focus on Priority Delivery and Product Reservation. The rationale is that these customers value convenience and exclusivity as recognition for their continued loyalty. The campaign will be executed via the Digital Channel, utilising In-App Home Banners and Post-Purchase Confirmation Screens to target customers when they are actively browsing or have just reinforced their habitual buying behavior.
-
-2. A specific Promotion Example is a Post-Purchase Banner displayed after the customer's 6th order. The message is designed to congratulate them: "Thank you for your loyalty! Upgrade to Mart Priority today for free priority delivery on all future purchases and early access to new gift-ware for your loved ones." This approach leverages their existing purchase count (the Frequency metric) to position the subscription as a natural "next-tier" reward. The Conversion Trigger for this promotion is met when the High Potential Retail Shopper (HPRS) places their 6th or 7th order (meeting the F ≥7 threshold), ensuring the data signal of habitual behaviour is immediately met with a message of recognition and a service upgrade.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image20.png)
 
 ## Share
 ### Data Visualisation
@@ -262,9 +247,7 @@ To ensure a clean, non-overlapping budget split and prevent conflicting marketin
 1. Prioritisation Rationale: All 291 overlapping customers were strategically assigned to the High Frequency Segment. This choice was based on the premise that high frequency is the strongest indicator of customer loyalty and greater readiness to adopt the Mart Priority service perks.
 2. Final Distinct Segments: This methodology resulted in two distinct, non-overlapping target groups, perfectly balancing the budget:
 
-The high-potential audience has been finalized into two distinct and nearly equal target segments for dedicated campaigns. The High Frequency segment totals 1,079 customers. 
-The criteria for this group includes the original high-frequency segment plus the 291 customers who were identified as exhibiting overlapping high frequency and high basket size behaviors. 
-This segment will receive a message focused on Loyalty and Service and will be funded by Budget A. The High Basket Size segment totals 1,087 customers and consists solely of customers who met the Basket Size rule only. This group will receive a message focused on Monetary benefits and Acquisition funded by Budget B. 
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image21.png)
 
 ### A. Interpretation 
 
@@ -297,22 +280,11 @@ This chart is the most powerful tool for convincing stakeholders and securing bu
 
 ## Summary of Findings: RS vs. LTC
 
-The Loyalty Tier Customer (LTC) segment exhibits significantly superior metrics across all features compared to the Regular Shopper (RS) segment. In terms of Total Value (Monetary), the LTC segment is Extremely High, spending 14.7 times more than the RS group. This financial contribution is sustained by Purchase Frequency, as LTCs are Highly Consistent, buying 8 times more often, while RSs are sporadic. Regarding Engagement (Recency), the LTC segment is Always Active, with 50% purchasing within 11 days, whereas RSs are Largely Dormant, with 50% not having purchased for 123 days.
-
-This behavior suggests RSs are primarily motivated by Price/Cost Savings (confirmed by high AOV in the target group), while LTCs are driven by Rewards and Exclusive Service (confirmed by their low Recency). Consequently, the Strategic Focus for the RS segment is Conversion, specifically targeting the 2,166 High-Potential Regular Shoppers (HPRS) to drive exponential growth. Conversely, the focus for the LTC segment is simply Retention to maintain this crucial profit engine.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image22.png)
 
 ## Act
-### I. Targeting High Basket Size Shoppers
 
-The first strategy focuses on the Monetary Conversion Stream, targeting the 1,087 High Basket Size HPRS (those above the AOV >£389.78 threshold). The action is to immediately target them using checkout pop-ups and email retargeting, with messaging focusing entirely on the financial savings and Special Discount Rates of Mart Priority. The estimated impact is the conversion of high-volume/wholesaler customers by leveraging the cognitive bias of cost-aversion, ensuring they lock in their highest-value transactions through subscription.
-
-### II. Targeting High Frequency Shoppers
-
-The second strategy targets the Loyalty Incentive and Service Conversion Stream, focusing on the High Frequency HPRS (those at or above the F ≥7 Orders threshold). The action is to programme a priority reward trigger to deploy an in-app notification immediately after the 6th order, offering Priority Delivery and exclusive access to reserved top-selling items. The estimated impact is the conversion of loyal/habitual retail customers by appealing to their value for convenience and service, ultimately pushing them to increase their monetary value (LTV).
-
-### III. Strategy Monitoring (Success Metrics)
-
-The final step is Strategy Monitoring for all 2,166 HPRS post-campaign. Success is defined using two primary, cross-functional KPIs: 1. an increase in Average Basket Size among the High Frequency group and 2. an increase in Frequency of Orders among the High Basket group. This monitoring ensures the budget is generating the correct behavioral shift among shoppers and provides data-backed evidence for continued investment in the two distinct conversion streams.
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image23.png)
 
 ## Conclusion 
 
@@ -332,7 +304,8 @@ Analysis of the customer base confirms that profitability is highly concentrated
 
 ### Strategic Recommendation: Two-Pronged Digital Campaign
 To effectively convert the 2,166 HPRS, the strategy avoids a single mass-market message and instead employs two distinct, targeted digital streams based on the customer's primary conversion signal.
-The high-potential target audience is precisely split into two segments, each with a tailored strategy. The first segment, the High Frequency HPRS, comprises 1,079 customers who meet the threshold of placing 7 or more orders (F≥7). Their primary motivation is Convenience and Loyalty Reward, so the Mart Priority benefit focus for this group is Priority Delivery and Product Reservation, emphasizing service. The second segment, the High Basket Size HPRS, comprises 1,087 customers who meet the threshold of an Average Order Value greater than £389.78 (AOV>£389.78). Their primary motivation is Cost Reduction and Value, and thus the Mart Priority benefit focuses on Special Discount Rates, emphasizing monetary savings.
+
+![image](https://github.com/Jerry5612/data-analyst-casestudy2/blob/Jerry5612-patch-2/image24.png)
 
 ### Implementation & Action
 Service Stream Action: Deploy in-app notifications after the 6th order, positioning the subscription as an exclusive loyalty upgrade offering benefits like priority access to top sellers (eg. World War 2 Gliders).
